@@ -1,0 +1,72 @@
+task_id: EXAMPLE-0001
+status: DRAFT
+
+repository:
+  name: example-project
+  base_ref: main
+  base_sha: "<verified-commit-sha>"
+
+objective: >-
+  Add one deterministic read-only evidence helper and tests for the behavior
+  described below. Do not alter runtime behavior outside this helper.
+
+authoritative_sources:
+  - src/existing_contract.py
+  - docs/current-behavior.md
+
+scope:
+  read:
+    - src/
+    - tests/
+    - docs/current-behavior.md
+  write:
+    - src/evidence_helper.py
+    - tests/test_evidence_helper.py
+  protected:
+    - deploy/
+    - secrets/
+    - docs/current-behavior.md
+
+actions:
+  allowed:
+    - inspect repository files
+    - edit only the approved write paths
+    - run local deterministic tests
+  forbidden:
+    - modify files outside write scope
+    - change dependencies
+    - commit, push, merge, or deploy
+    - use destructive shell commands
+    - broaden the requested semantics
+
+validation:
+  required:
+    - python -m py_compile src/evidence_helper.py
+    - python -m unittest tests.test_evidence_helper
+    - python -m unittest discover
+
+acceptance_criteria:
+  - helper is read-only
+  - output is deterministic for equivalent input state
+  - malformed input fails explicitly rather than being guessed at
+  - targeted tests cover normal and adversarial cases
+  - full regression suite remains green
+
+stop_conditions:
+  - base source no longer matches base_sha
+  - required behavior conflicts with an authoritative source
+  - implementation requires a file outside write scope
+  - required validation cannot be executed or interpreted reliably
+
+human_decisions:
+  - approve any scope expansion
+  - accept or reject the implementation
+  - authorize commit, publication, merge, or deployment
+
+closeout:
+  record:
+    - final source identity
+    - changed files
+    - validation results
+    - review findings and unresolved uncertainty
+    - human acceptance decision
