@@ -1,0 +1,33 @@
+name: Validate engineering evidence
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Compile initial candidate
+        working-directory: case-studies/ao-agent-0014/initial
+        run: python -m py_compile worker_artifact_inventory.py
+
+      - name: Run original nine-test candidate suite
+        working-directory: case-studies/ao-agent-0014/initial
+        run: python -m unittest -v test_worker_artifact_inventory.py
+
+      - name: Compile accepted standalone extraction
+        working-directory: case-studies/ao-agent-0014/accepted
+        run: python -m py_compile worker_artifact_inventory.py
+
+      - name: Run accepted public adversarial suite
+        working-directory: case-studies/ao-agent-0014/accepted
+        run: python -m unittest -v test_worker_artifact_inventory.py
